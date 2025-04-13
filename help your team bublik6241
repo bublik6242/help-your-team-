@@ -1,0 +1,133 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+
+-- Создаем основной интерфейс
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "TeleportGUI"
+ScreenGui.Parent = game.CoreGui
+
+-- Контейнер для кнопок
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 200, 0, 250)
+MainFrame.Position = UDim2.new(0.8, 0, 0.5, -125)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = ScreenGui
+
+-- Кнопка управления видимостью
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Size = UDim2.new(0, 40, 0, 40)
+ToggleButton.Position = UDim2.new(1, -40, 0, 0)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+ToggleButton.TextColor3 = Color3.new(1, 1, 1)
+ToggleButton.Text = "X"
+ToggleButton.Font = Enum.Font.SourceSansBold
+ToggleButton.Parent = ScreenGui
+
+-- Функция переключения видимости
+local function toggleGUI()
+    MainFrame.Visible = not MainFrame.Visible
+    ToggleButton.Text = MainFrame.Visible and "X" or ">"
+end
+
+ToggleButton.MouseButton1Click:Connect(toggleGUI)
+
+-- Стили для кнопок
+local buttonStyle = {
+    Size = UDim2.new(0.9, 0, 0, 35),
+    Position = UDim2.new(0.05, 0, 0, 0),
+    BackgroundColor3 = Color3.fromRGB(60, 60, 60),
+    TextColor3 = Color3.new(1, 1, 1),
+    Font = Enum.Font.GothamMedium,
+    TextSize = 14
+}
+
+-- Создаем кнопки телепортов
+local function createButton(name, yPosition, callback)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Size = buttonStyle.Size
+    button.Position = UDim2.new(0.05, 0, 0, yPosition)
+    button.BackgroundColor3 = buttonStyle.BackgroundColor3
+    button.TextColor3 = buttonStyle.TextColor3
+    button.Font = buttonStyle.Font
+    button.TextSize = buttonStyle.TextSize
+    button.Text = name
+    button.Parent = MainFrame
+    
+    button.MouseButton1Click:Connect(function()
+        pcall(callback) -- Обработка ошибок
+    end)
+end
+
+-- Расположение кнопок
+local buttons = {
+    {"Tp to TeslaLab", 10, function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/0Bw35CPv"))()
+    end},
+    
+    {"Tp to Fort", 50, function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/Tpfort.github.io/refs/heads/main/Tpfort.lua"))()
+    end},
+    
+    {"Tp to End", 90, function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/bublik6242/V2-Auto-win-Bublik6241/main/V2%20Auto%20win%20Bublik6241"))()
+    end},
+    
+    {"Tp to Castle", 130, function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ringtaa/castletpfast.github.io/refs/heads/main/FASTCASTLE.lua"))()
+    end},
+    
+    {"Tp to Start", 170, function()
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local pos = Vector3.new(59.67, 11.97, 29872.71)
+            for i = 1, 10 do
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(pos)
+                task.wait(0.1)
+            end
+        end
+    end}
+}
+
+-- Создаем все кнопки
+for _, btnData in ipairs(buttons) do
+    createButton(btnData[1], btnData[2], btnData[3])
+end
+
+-- Дополнительные функции
+local function dragGUI(frame)
+    local dragToggle = nil
+    local dragInput = nil
+    local dragStart = nil
+    local startPos = nil
+    
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragToggle = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragToggle = false
+                end
+            end)
+        end
+    end)
+    
+    UIS.InputChanged:Connect(function(input)
+        if input == dragInput and dragToggle then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- Включаем перетаскивание окна
+dragGUI(MainFrame)
+
+-- Первоначальное состояние
+toggleGUI()
